@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-
+const _ = require("lodash");
 //const date = require(__dirname + "/date.js")
 
 const app = express();
@@ -97,7 +97,7 @@ app.post("/", function(req, res) {
 
     if( listName === "Today"){
       item.save();
-      es.redirect("/");
+      res.redirect("/");
     } else {
       List.findOne({name: listName})
         .then(foundList => {
@@ -117,20 +117,37 @@ app.post("/", function(req, res) {
 
 app.post("/delete", function(req, res) {
   let checkidItemId = req.body.checkbox;
+  let listName = req.body.listName;
 
-  Item.findByIdAndRemove(checkidItemId)
-    .then( ()=> {
-      console.log("Borrado correctamente");
-      res.redirect("/")
-    })
-    .catch(error=> {
-      console.log(error);
-      res.status(500).send("Error al eliminar")
-    });
+  if( listName === "Today") {
+    Item.findByIdAndRemove(checkidItemId)
+      .then( ()=> {
+        console.log("Borrado correctamente");
+        res.redirect("/")
+      })
+      .catch(error=> {
+        console.log(error);
+        res.status(500).send("Error al eliminar")
+      });
+  } else {
+    List.findOneAndUpdate(
+      { name: listName },
+      { $pull: { items: { _id: checkidItemId } } }
+    )
+      .then(foundList => {
+        res.redirect("/" + listName);
+      })
+      .catch(error => {
+        console.log(error);
+        res.status(500).send("Error al eliminar");
+      });
+  }
+
+  
 });
 
 app.get("/:listaPersonalizada", (req, res)=> {
-  const listaPersonalizada = req.params.listaPersonalizada;
+  const listaPersonalizada = _.capitalize(req.params.listaPersonalizada);
 
   List.findOne({name: listaPersonalizada})
     .then(foundList => {

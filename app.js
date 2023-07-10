@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
@@ -5,14 +6,13 @@ const _ = require("lodash");
 //const date = require(__dirname + "/date.js")
 
 const app = express();
-
-
+const port = process.env.PORT;
 
 app.set('view engine', 'ejs')
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(express.static("public"));
 
-mongoose.connect('mongodb://127.0.0.1:27017/todolistDB', {useNewUrlParser: true})
+mongoose.connect('mongodb+srv://XeanN:AngelJeanPierre@clusterfirst.niscfku.mongodb.net/todolistDB', {useNewUrlParser: true})
   .then( ()=>{
     console.log("Conectado correctamente");
   })
@@ -185,8 +185,8 @@ app.get("/about", (req, res)=> {
 })
 
 
-app.listen(3000, ()=> {
-    console.log("Server Started on port 3000");
+app.listen(port, ()=> {
+    console.log(`Server Started on port ${port}`);
 })
 //TODO: Para eliminar
 /*
